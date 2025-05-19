@@ -12,14 +12,7 @@ class userController extends Controller
 {
     public function createUser(Request $request){
 
-        $validate = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'correo' => 'required|string|email|max:255|unique:users',
-            'telefono' => 'required|integer|unique:users',
-            'contrasena' => 'required|string|min:8|confirmed',
-        ]);
-
+    
         $user = User::where('correo', $request->correo)->first();
 
         if($user){
@@ -43,5 +36,59 @@ class userController extends Controller
         ]);
 
 
+    }
+
+    public function loginUser(Request $request){
+
+        $user = User::where('correo', $request->correo)->first();
+
+        if(!$user){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El usuario no existe con dichos datos.'
+            ]);
+        }
+
+        if(!Hash::check($request->contrasena, $user->contrasena)){
+            return response()->json([
+                'status' => 500,
+                'message' => 'La contraseña es incorrecta.'
+            ]);
+        }
+
+        $token = $user->createToken('token')->plainTextToken;
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Usuario logueado correctamente.',
+            'token' => $token
+        ]);
+    }
+
+    public function logoutUser(Request $request){
+
+    
+        $token = $request->bearerToken();
+        if(!$token){
+            return response()->json([
+                'status' => 500,
+                'message' => 'No se ha proporcionado un token.'
+            ]);
+        }
+
+        $user = User::where('remember_token', $token)->first();
+        if(!$user){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El token no es válido.'
+            ]);
+        }
+
+        $user->tokens()->where('id', $token)->delete();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Usuario deslogueado correctamente.'
+        ]);
     }
 }
