@@ -58,37 +58,124 @@ class userController extends Controller
 
         $token = $user->createToken('token')->plainTextToken;
 
+        
         return response()->json([
             'status' => 200,
             'message' => 'Usuario logueado correctamente.',
-            'token' => $token
+            'token' => $token,
+            'user' => $user,
+            'user_id' => $user->id,
         ]);
     }
 
     public function logoutUser(Request $request){
 
     
-        $token = $request->bearerToken();
-        if(!$token){
-            return response()->json([
-                'status' => 500,
-                'message' => 'No se ha proporcionado un token.'
-            ]);
-        }
+        $request->user()->tokens()->delete();
 
-        $user = User::where('remember_token', $token)->first();
-        if(!$user){
-            return response()->json([
-                'status' => 500,
-                'message' => 'El token no es válido.'
-            ]);
-        }
-
-        $user->tokens()->where('id', $token)->delete();
 
         return response()->json([
             'status' => 200,
             'message' => 'Usuario deslogueado correctamente.'
+        ]);
+    }
+
+
+    public function deleteUser($id){
+
+        
+
+        if($id == null){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El id no puede ser nulo.'
+            ]);
+        }
+
+        $user = User::find($id);
+
+        if($user == null){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El usuario no existe con dichos datos.'
+            ]);
+        }
+
+        $user->delete();
+
+        // Eliminamos el token
+
+        $user->tokens()->delete();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Usuario eliminado correctamente.'
+        ]);
+    }
+
+    public function updateUser(Request $request, $id){
+        
+
+        $contrasena = null;
+
+        if($id == null){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El id no puede ser nulo.'
+            ]);
+        }
+
+        $user = User::find($id);
+
+        if($user == null){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El usuario no existe con dichos datos.'
+            ]);
+        }
+
+        if($request->contrasena == "" || $request->contrasena == null){
+            $contrasena = $user->contrasena;
+        }else{
+            $contrasena = Hash::make($request->contrasena);
+        }
+
+        $user->update([
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'correo' => $request->correo,
+            'telefono' => $request->telefono,
+            'contrasena' => $contrasena,
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Usuario actualizado correctamente.'
+        ]);
+    }
+
+    public function getUser($id){
+        
+        if($id == null){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El id no puede ser nulo.'
+            ]);
+        }
+
+        $user = User::find($id);
+
+        if($user == null){
+            return response()->json([
+                'status' => 500,
+                'message' => 'El usuario no existe con dichos datos.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Usuario encontrado correctamente.',
+            'user' => $user
         ]);
     }
 }
