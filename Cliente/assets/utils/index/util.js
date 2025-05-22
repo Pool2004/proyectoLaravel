@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     btnLogin.addEventListener("click", function(e){
         e.preventDefault();
 
-        const url = "https://proyectolaravel-production-ef8b.up.railway.app/api/login/user";
+        const url = "https://proyectolaravel-production-17a3.up.railway.app/api/login/user";
 
         const data = {
             correo: correo.value,
