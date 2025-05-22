@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     btnRegister.addEventListener("click", function(e){
         e.preventDefault();
 
-        const url = "proyectolaravel-production-2e47.up.railway.app/api/create/user";
+        const url = "https://proyectolaravel-production-2e47.up.railway.app/api/create/user";
 
         const data = {
             nombre: nombre.value,
